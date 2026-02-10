@@ -1,0 +1,25 @@
+# Python
+__pycache__/*
+*.py[cod]
+*.pyd
+*.pyo
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.env/
+
+# Test/coverage artifacts
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Tooling
+.mypy_cache/
+.ruff_cache/
+
+# OS files
+.DS_Store
