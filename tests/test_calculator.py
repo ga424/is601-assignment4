@@ -4,89 +4,62 @@ from io import StringIO
 from app.calculator import calculator
 
 
-def test_calculator_addition():
-    """Test calculator with addition operation"""
-    with patch('builtins.input', side_effect=['add 1 1', 'exit']):
+@pytest.mark.parametrize(
+    "user_input,expected",
+    [
+        # Happy-path operations, including case-insensitive command and floats.
+        ("add 1 1", "1.0 add 1.0 = 2.0"),
+        ("subtract 5 3", "5.0 subtract 3.0 = 2.0"),
+        ("multiply 2 3", "2.0 multiply 3.0 = 6.0"),
+        ("divide 6 2", "6.0 divide 2.0 = 3.0"),
+        ("ADD 2 3", "2.0 ADD 3.0 = 5.0"),
+        ("add 1.5 2.5", "1.5 add 2.5 = 4.0"),
+    ],
+    ids=[
+        "adds two integers",
+        "subtracts two integers",
+        "multiplies two integers",
+        "divides two integers",
+        "accepts uppercase operation input",
+        "adds floating point numbers",
+    ],
+)
+def test_calculator_basic_operations(user_input, expected):
+    with patch('builtins.input', side_effect=[user_input, 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
             output = fake_out.getvalue()
-            assert '1.0 add 1.0 = 2.0' in output
+            assert expected in output
 
 
-def test_calculator_subtraction():
-    """Test calculator with subtraction operation"""
-    with patch('builtins.input', side_effect=['subtract 5 3', 'exit']):
+@pytest.mark.parametrize(
+    "user_input,expected",
+    [
+        # Invalid inputs and error messaging.
+        ("divide 1 0", "Error: Cannot divide by zero."),
+        ("invalid 1 2", "Error: Unknown operation 'invalid'"),
+        ("add 1 abc", "Error: Operands must be numbers"),
+        ("add 1", "Error: Invalid format"),
+        ("add 1 2 3", "Error: Invalid format"),
+    ],
+    ids=[
+        "reports an error for division by zero",
+        "reports an error for an unknown operation",
+        "reports an error for non-numeric operands",
+        "reports an error for too few arguments",
+        "reports an error for too many arguments",
+    ],
+)
+def test_calculator_error_cases(user_input, expected):
+    with patch('builtins.input', side_effect=[user_input, 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
             output = fake_out.getvalue()
-            assert '5.0 subtract 3.0 = 2.0' in output
-
-
-def test_calculator_multiplication():
-    """Test calculator with multiplication operation"""
-    with patch('builtins.input', side_effect=['multiply 2 3', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert '2.0 multiply 3.0 = 6.0' in output
-
-
-def test_calculator_division():
-    """Test calculator with division operation"""
-    with patch('builtins.input', side_effect=['divide 6 2', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert '6.0 divide 2.0 = 3.0' in output
-
-
-def test_calculator_division_by_zero():
-    """Test calculator handles division by zero"""
-    with patch('builtins.input', side_effect=['divide 1 0', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert 'Error: Cannot divide by zero.' in output
-
-
-def test_calculator_invalid_operation():
-    """Test calculator handles invalid operation"""
-    with patch('builtins.input', side_effect=['invalid 1 2', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert "Error: Unknown operation 'invalid'" in output
-
-
-def test_calculator_invalid_operand():
-    """Test calculator handles non-numeric operands"""
-    with patch('builtins.input', side_effect=['add 1 abc', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert "Error: Operands must be numbers" in output
-
-
-def test_calculator_invalid_format_too_few_args():
-    """Test calculator handles too few arguments"""
-    with patch('builtins.input', side_effect=['add 1', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert "Error: Invalid format" in output
-
-
-def test_calculator_invalid_format_too_many_args():
-    """Test calculator handles too many arguments"""
-    with patch('builtins.input', side_effect=['add 1 2 3', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert "Error: Invalid format" in output
+            assert expected in output
 
 
 def test_calculator_exit_command():
-    """Test calculator exits with 'exit' command"""
+    # Ensure a single exit command terminates the REPL.
     with patch('builtins.input', side_effect=['exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
@@ -94,17 +67,8 @@ def test_calculator_exit_command():
             assert 'Goodbye!' in output
 
 
-def test_calculator_case_insensitive_operations():
-    """Test calculator operations are case insensitive"""
-    with patch('builtins.input', side_effect=['ADD 2 3', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert '2.0 ADD 3.0 = 5.0' in output
-
-
 def test_calculator_multiple_operations():
-    """Test calculator can perform multiple operations"""
+    # Ensure the REPL processes multiple commands before exit.
     with patch('builtins.input', side_effect=['add 1 1', 'multiply 2 3', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
@@ -114,17 +78,8 @@ def test_calculator_multiple_operations():
             assert 'Goodbye!' in output
 
 
-def test_calculator_floating_point_operands():
-    """Test calculator handles floating point numbers"""
-    with patch('builtins.input', side_effect=['add 1.5 2.5', 'exit']):
-        with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
-            output = fake_out.getvalue()
-            assert '1.5 add 2.5 = 4.0' in output
-
-
 def test_calculator_keyboard_interrupt():
-    """Test calculator handles keyboard interrupt gracefully"""
+    # Ensure KeyboardInterrupt exits cleanly.
     with patch('builtins.input', side_effect=KeyboardInterrupt()):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
@@ -133,7 +88,7 @@ def test_calculator_keyboard_interrupt():
 
 
 def test_calculator_error_recovery():
-    """Test calculator continues after an error"""
+    # Ensure the REPL continues after a bad command.
     with patch('builtins.input', side_effect=['add abc def', 'add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
@@ -144,11 +99,11 @@ def test_calculator_error_recovery():
 
 
 def test_calculator_unexpected_exception():
-    """Test calculator handles unexpected exceptions"""
+    # Ensure unexpected errors are surfaced without crashing the loop.
     with patch('builtins.input', side_effect=['add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             # Mock the addition operation from app.operations to raise an unexpected error
-            with patch('app.calculator.addition', side_effect=RuntimeError("Unexpected error")):
+            with patch('app.calculator.Operations.addition', side_effect=RuntimeError("Unexpected error")):
                 calculator()
                 output = fake_out.getvalue()
                 assert "Unexpected error" in output
