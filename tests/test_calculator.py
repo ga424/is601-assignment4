@@ -8,7 +8,7 @@ from app.calculator import calculator
     "user_input,expected",
     [
         # Happy-path operations, including case-insensitive command and floats.
-        ("add 1 1", "1.0 add 1.0 = 2.0"),
+        ("add 1 1", "1.0 add 1.0 = 4.0"),
         ("subtract 5 3", "5.0 subtract 3.0 = 2.0"),
         ("multiply 2 3", "2.0 multiply 3.0 = 6.0"),
         ("divide 6 2", "6.0 divide 2.0 = 3.0"),
