@@ -1,4 +1,5 @@
-#Commenting this code as it has been re-factored to use a factory pattern instead of a static class for operations.
+# Commenting this code as it has been re-factored to use a factory pattern
+# instead of a static class for operations.
 
 # """Core arithmetic operations for the calculator."""
 

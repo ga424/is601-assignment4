@@ -28,7 +28,7 @@ class Calculator:  # pylint: disable=too-few-public-methods
         for attribute in ("calculations", "_calculations", "_registry"):
             registry = getattr(CalculationFactory, attribute, None)
             if isinstance(registry, dict) and registry:
-                return {name: None for name in registry.keys()}
+                return {name: None for name in registry}
         return {}
 
     def run(self) -> None:
@@ -40,7 +40,7 @@ class Calculator:  # pylint: disable=too-few-public-methods
                 user_input = self.input_func(">>> ").strip()
                 if not user_input:
                     continue
-                
+
                 # Handle special commands
                 if user_input.lower() == "exit":
                     self.output_func("Goodbye!")
@@ -76,7 +76,7 @@ class Calculator:  # pylint: disable=too-few-public-methods
         self.output_func("Example: add 1 1")
         self.output_func("Special commands: help, history, exit")
         self.output_func("Type 'help' for more information.\n")
-    
+
     def _print_help(self) -> None:
         """Print detailed help information."""
         self.output_func("\n=== Calculator Helper Functions ===")
@@ -89,14 +89,16 @@ class Calculator:  # pylint: disable=too-few-public-methods
         self.output_func("  exit       - Exit the calculator")
         self.output_func("\nUsage: <operation> <operand1> <operand2>")
         self.output_func("Example: add 5 3\n")
-    
+
     def _print_history(self) -> None:
         """Print calculation history."""
         if not self.history:
             self.output_func("No calculations in history.")
             return
-        
-        self.output_func(f"\n=== Calculation History ({len(self.history)} entries) ===")
+
+        self.output_func(
+            f"\n=== Calculation History ({len(self.history)} entries) ==="
+        )
         for idx, entry in enumerate(self.history, 1):
             self.output_func(f"{idx}. {entry}")
         self.output_func("")
@@ -106,7 +108,9 @@ class Calculator:  # pylint: disable=too-few-public-methods
         # Parse and validate the user's input.
         parts = user_input.split()
         if len(parts) != 3:
-            raise ValueError("Invalid format. Please provide: operation operand1 operand2")
+            raise ValueError(
+                "Invalid format. Please provide: operation operand1 operand2"
+            )
 
         operation, operand1_str, operand2_str = parts
         if operation.lower() not in self.operations:
@@ -132,14 +136,3 @@ class Calculator:  # pylint: disable=too-few-public-methods
             operand2,
         )
         return calculation.execute()
-
-
-def calculator() -> None:
-    """
-    Interactive calculator REPL that accepts operations and two operands.
-    Usage: operation operand1 operand2
-    Example: add 1 1
-    Type 'exit' to quit.
-    """
-    # Provide a simple module-level entry point.
-    Calculator().run()
