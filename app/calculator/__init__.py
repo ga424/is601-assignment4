@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Callable, Dict, Tuple
 
-from app.operations import Operations
+from app.calculation import CalculationFactory
 
 
 class Calculator:  # pylint: disable=too-few-public-methods
@@ -16,15 +17,18 @@ class Calculator:  # pylint: disable=too-few-public-methods
         output_func: Callable[[str], None] | None = None,
     ) -> None:
         if operations is None:
-            operations = {
-                "add": Operations.addition,
-                "subtract": Operations.subtraction,
-                "multiply": Operations.multiplication,
-                "divide": Operations.division,
-            }
+            operations = self._build_operation_registry()
         self.operations = operations
         self.input_func = input if input_func is None else input_func
         self.output_func = print if output_func is None else output_func
+
+    def _build_operation_registry(self) -> Dict[str, Callable[[float, float], float]]:
+        """Build an operations registry based on factory registrations."""
+        for attribute in ("calculations", "_calculations", "_registry"):
+            registry = getattr(CalculationFactory, attribute, None)
+            if isinstance(registry, dict) and registry:
+                return {name: None for name in registry.keys()}
+        return {}
 
     def run(self) -> None:
         """Run the calculator REPL loop."""
@@ -84,7 +88,12 @@ class Calculator:  # pylint: disable=too-few-public-methods
         """Execute the selected operation and return the result."""
         # Dispatch to the selected operation.
         operation_key = operation.lower()
-        return self.operations[operation_key](operand1, operand2)
+        calculation = CalculationFactory.create_calculation(
+            SimpleNamespace(name=operation_key),
+            operand1,
+            operand2,
+        )
+        return calculation.execute()
 
 
 def calculator() -> None:
