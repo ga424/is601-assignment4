@@ -163,9 +163,12 @@ def test_duplicate_registration():
     """Ensure registering the same operation twice raises ValueError."""
     with pytest.raises(ValueError, match="is already registered"):
         @CalculationFactory.register_calculation("add")
-        class DuplicateAddCalculation:
+        class _DuplicateAddCalculation:  # pylint: disable=too-few-public-methods
+            """Minimal duplicate for registration collision testing."""
             def __init__(self, a, b):
                 self.a = a
                 self.b = b
+
             def execute(self):
+                """Return a deterministic value for test registration."""
                 return self.a + self.b
