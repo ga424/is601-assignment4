@@ -41,7 +41,8 @@ jobs:
           flags: unittests
           name: codecov-coverage-report
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}      
+          token: ${{ secrets.CODECOV_TOKEN }}
+      
       - name: Fail if coverage is below threshold
         run: |
           coverage report --fail-under=100
