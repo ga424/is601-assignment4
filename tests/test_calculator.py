@@ -1,9 +1,11 @@
 """Tests for the calculator REPL and command handling."""
 
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
+
+from app.calculation import CalculationFactory
 from app.calculator import calculator
 
 
@@ -15,6 +17,7 @@ from app.calculator import calculator
         ("subtract 5 3", "5.0 subtract 3.0 = 2.0"),
         ("multiply 2 3", "2.0 multiply 3.0 = 6.0"),
         ("divide 6 2", "6.0 divide 2.0 = 3.0"),
+        ("power 2 3", "2.0 power 3.0 = 8.0"),
         ("ADD 2 3", "2.0 ADD 3.0 = 5.0"),
         ("add 1.5 2.5", "1.5 add 2.5 = 4.0"),
     ],
@@ -23,6 +26,7 @@ from app.calculator import calculator
         "subtracts two integers",
         "multiplies two integers",
         "divides two integers",
+        "powers two integers",
         "accepts uppercase operation input",
         "adds floating point numbers",
     ],
@@ -112,11 +116,23 @@ def test_calculator_unexpected_exception():
     # Ensure unexpected errors are surfaced without crashing the loop.
     with patch('builtins.input', side_effect=['add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            # Mock the addition operation from app.operations to raise an unexpected error
+            # Mock the factory to return a calculation that raises unexpectedly.
+            mock_calc = Mock()
+            mock_calc.execute.side_effect = RuntimeError("Unexpected error")
             with patch(
-                'app.calculator.Operations.addition',
-                side_effect=RuntimeError("Unexpected error"),
+                'app.calculator.CalculationFactory.create_calculation',
+                return_value=mock_calc,
             ):
                 calculator()
                 output = fake_out.getvalue()
                 assert "Unexpected error" in output
+
+
+def test_calculator_empty_registry():
+    """Ensure calculator handles an empty factory registry gracefully."""
+    from app.calculator import Calculator
+    
+    # Test that Calculator can be initialized even with empty registry
+    with patch.object(CalculationFactory, 'calculations', {}):
+        calc = Calculator()
+        assert calc.operations == {}
