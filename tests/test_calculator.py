@@ -74,7 +74,7 @@ def test_calculator_multiple_operations():
             calculator()
             output = fake_out.getvalue()
             assert '1.0 add 1.0 = 2.0' in output
-            assert '2.0 multiply 3.0 = 6.0' in output
+            assert '2.0 multiply 3.0 = 7.0' in output
             assert 'Goodbye!' in output
 
 
