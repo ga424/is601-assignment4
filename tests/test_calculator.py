@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from app.calculation import CalculationFactory
-from app.calculator import calculator
+from app.calculator import Calculator
 
 
 @pytest.mark.parametrize(
@@ -35,7 +35,7 @@ def test_calculator_basic_operations(user_input, expected):
     """Validate supported operations and numeric inputs."""
     with patch('builtins.input', side_effect=[user_input, 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert expected in output
 
@@ -62,7 +62,7 @@ def test_calculator_error_cases(user_input, expected):
     """Ensure invalid inputs return helpful error messages."""
     with patch('builtins.input', side_effect=[user_input, 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert expected in output
 
@@ -72,7 +72,7 @@ def test_calculator_exit_command():
     # Ensure a single exit command terminates the REPL.
     with patch('builtins.input', side_effect=['exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert 'Goodbye!' in output
 
@@ -82,7 +82,7 @@ def test_calculator_multiple_operations():
     # Ensure the REPL processes multiple commands before exit.
     with patch('builtins.input', side_effect=['add 1 1', 'multiply 2 3', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert '1.0 add 1.0 = 2.0' in output
             assert '2.0 multiply 3.0 = 6.0' in output
@@ -94,7 +94,7 @@ def test_calculator_keyboard_interrupt():
     # Ensure KeyboardInterrupt exits cleanly.
     with patch('builtins.input', side_effect=KeyboardInterrupt()):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert 'Goodbye!' in output
 
@@ -104,7 +104,7 @@ def test_calculator_error_recovery():
     # Ensure the REPL continues after a bad command.
     with patch('builtins.input', side_effect=['add abc def', 'add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert "Error: Operands must be numbers" in output
             assert '1.0 add 1.0 = 2.0' in output
@@ -123,15 +123,13 @@ def test_calculator_unexpected_exception():
                 'app.calculator.CalculationFactory.create_calculation',
                 return_value=mock_calc,
             ):
-                calculator()
+                Calculator().run()
                 output = fake_out.getvalue()
                 assert "Unexpected error" in output
 
 
 def test_calculator_empty_registry():
     """Ensure calculator handles an empty factory registry gracefully."""
-    from app.calculator import Calculator
-    
     # Test that Calculator can be initialized even with empty registry
     with patch.object(CalculationFactory, 'calculations', {}):
         calc = Calculator()
@@ -142,7 +140,7 @@ def test_calculator_help_command():
     """Verify the help command displays helpful information."""
     with patch('builtins.input', side_effect=['help', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert '=== Calculator Helper Functions ===' in output
             assert 'available operations:' in output
@@ -156,16 +154,19 @@ def test_calculator_history_empty():
     """Verify the history command with no calculations."""
     with patch('builtins.input', side_effect=['history', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert 'No calculations in history' in output
 
 
 def test_calculator_history_with_calculations():
     """Verify the history command tracks and displays calculations."""
-    with patch('builtins.input', side_effect=['add 2 3', 'multiply 4 5', 'history', 'exit']):
+    with patch(
+        'builtins.input',
+        side_effect=['add 2 3', 'multiply 4 5', 'history', 'exit'],
+    ):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert '=== Calculation History' in output
             assert '1. 2.0 add 3.0 = 5.0' in output
@@ -177,7 +178,7 @@ def test_calculator_empty_input():
     """Verify empty input is handled gracefully."""
     with patch('builtins.input', side_effect=['', '  ', 'add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert '1.0 add 1.0 = 2.0' in output
             assert 'Goodbye!' in output
@@ -187,7 +188,7 @@ def test_calculator_special_commands_case_insensitive():
     """Verify special commands are case-insensitive."""
     with patch('builtins.input', side_effect=['HELP', 'HISTORY', 'EXIT']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             assert '=== Calculator Helper Functions ===' in output
             assert 'No calculations in history' in output
@@ -196,9 +197,12 @@ def test_calculator_special_commands_case_insensitive():
 
 def test_calculator_history_not_affected_by_errors():
     """Verify errors don't get added to history."""
-    with patch('builtins.input', side_effect=['add 1 1', 'invalid op', 'subtract 5 2', 'history', 'exit']):
+    with patch(
+        'builtins.input',
+        side_effect=['add 1 1', 'invalid op', 'subtract 5 2', 'history', 'exit'],
+    ):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             # Verify the successful calculations are in history
             assert '1. 1.0 add 1.0 = 2.0' in output
@@ -219,7 +223,7 @@ def test_calculator_mixed_session():
         'exit'
     ]):
         with patch('sys.stdout', new=StringIO()) as fake_out:
-            calculator()
+            Calculator().run()
             output = fake_out.getvalue()
             # Verify calculations executed
             assert '1.0 add 1.0 = 2.0' in output
