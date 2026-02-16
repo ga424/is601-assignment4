@@ -129,7 +129,8 @@ def test_division(a, b, expected):
 
 def test_division_by_zero():
     """Ensure division by zero raises a ValueError."""
-    with pytest.raises(ValueError, match="Cannot divide by zero"):
+    with pytest.raises(ZeroDivisionError
+                       , match="Cannot divide by zero"):
         calculation = _create_calculation("divide", 1, 0)
         calculation.execute()
 

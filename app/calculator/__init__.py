@@ -53,7 +53,11 @@ class Calculator:  # pylint: disable=too-few-public-methods
                     continue
 
                 operation, operand1, operand2 = self._parse_input(user_input)
-                result = self._execute(operation, operand1, operand2)
+                try:
+                    result = self._execute(operation, operand1, operand2)
+                except (ValueError, ZeroDivisionError) as exc:
+                    self.output_func(f"Error: {exc}")
+                    continue
                 output = f"{operand1} {operation} {operand2} = {result}"
                 self.history.append(output)
                 self.output_func(output)
