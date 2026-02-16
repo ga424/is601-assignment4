@@ -1,4 +1,7 @@
+"""Tests for arithmetic operations."""
+
 import pytest
+
 from app.operations import Operations
 
 
@@ -21,6 +24,7 @@ from app.operations import Operations
     ],
 )
 def test_addition(a, b, expected):
+    """Validate addition across basic cases."""
     assert Operations.addition(a, b) == expected
 
 
@@ -43,6 +47,7 @@ def test_addition(a, b, expected):
     ],
 )
 def test_subtraction(a, b, expected):
+    """Validate subtraction across basic cases."""
     assert Operations.subtraction(a, b) == expected
 
 
@@ -65,6 +70,7 @@ def test_subtraction(a, b, expected):
     ],
 )
 def test_multiplication(a, b, expected):
+    """Validate multiplication across basic cases."""
     assert Operations.multiplication(a, b) == expected
 
 
@@ -87,9 +93,11 @@ def test_multiplication(a, b, expected):
     ],
 )
 def test_division(a, b, expected):
+    """Validate division across basic cases."""
     assert Operations.division(a, b) == expected
 
 
 def test_division_by_zero():
+    """Ensure division by zero raises a ValueError."""
     with pytest.raises(ValueError, match="Cannot divide by zero"):
         Operations.division(1, 0)

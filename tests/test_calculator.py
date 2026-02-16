@@ -1,6 +1,9 @@
-import pytest
-from unittest.mock import patch
+"""Tests for the calculator REPL and command handling."""
+
 from io import StringIO
+from unittest.mock import patch
+
+import pytest
 from app.calculator import calculator
 
 
@@ -25,6 +28,7 @@ from app.calculator import calculator
     ],
 )
 def test_calculator_basic_operations(user_input, expected):
+    """Validate supported operations and numeric inputs."""
     with patch('builtins.input', side_effect=[user_input, 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
@@ -51,6 +55,7 @@ def test_calculator_basic_operations(user_input, expected):
     ],
 )
 def test_calculator_error_cases(user_input, expected):
+    """Ensure invalid inputs return helpful error messages."""
     with patch('builtins.input', side_effect=[user_input, 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             calculator()
@@ -59,6 +64,7 @@ def test_calculator_error_cases(user_input, expected):
 
 
 def test_calculator_exit_command():
+    """Verify the exit command stops the REPL."""
     # Ensure a single exit command terminates the REPL.
     with patch('builtins.input', side_effect=['exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
@@ -68,6 +74,7 @@ def test_calculator_exit_command():
 
 
 def test_calculator_multiple_operations():
+    """Ensure multiple commands are processed in a single session."""
     # Ensure the REPL processes multiple commands before exit.
     with patch('builtins.input', side_effect=['add 1 1', 'multiply 2 3', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
@@ -79,6 +86,7 @@ def test_calculator_multiple_operations():
 
 
 def test_calculator_keyboard_interrupt():
+    """Confirm a keyboard interrupt exits cleanly."""
     # Ensure KeyboardInterrupt exits cleanly.
     with patch('builtins.input', side_effect=KeyboardInterrupt()):
         with patch('sys.stdout', new=StringIO()) as fake_out:
@@ -88,6 +96,7 @@ def test_calculator_keyboard_interrupt():
 
 
 def test_calculator_error_recovery():
+    """Confirm the loop continues after a bad command."""
     # Ensure the REPL continues after a bad command.
     with patch('builtins.input', side_effect=['add abc def', 'add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
@@ -99,11 +108,15 @@ def test_calculator_error_recovery():
 
 
 def test_calculator_unexpected_exception():
+    """Surface unexpected exceptions without stopping the loop."""
     # Ensure unexpected errors are surfaced without crashing the loop.
     with patch('builtins.input', side_effect=['add 1 1', 'exit']):
         with patch('sys.stdout', new=StringIO()) as fake_out:
             # Mock the addition operation from app.operations to raise an unexpected error
-            with patch('app.calculator.Operations.addition', side_effect=RuntimeError("Unexpected error")):
+            with patch(
+                'app.calculator.Operations.addition',
+                side_effect=RuntimeError("Unexpected error"),
+            ):
                 calculator()
                 output = fake_out.getvalue()
                 assert "Unexpected error" in output
