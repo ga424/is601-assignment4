@@ -136,3 +136,99 @@ def test_calculator_empty_registry():
     with patch.object(CalculationFactory, 'calculations', {}):
         calc = Calculator()
         assert calc.operations == {}
+
+
+def test_calculator_help_command():
+    """Verify the help command displays helpful information."""
+    with patch('builtins.input', side_effect=['help', 'exit']):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            assert '=== Calculator Helper Functions ===' in output
+            assert 'available operations:' in output
+            assert 'Special Commands:' in output
+            assert 'help' in output
+            assert 'history' in output
+            assert 'exit' in output
+
+
+def test_calculator_history_empty():
+    """Verify the history command with no calculations."""
+    with patch('builtins.input', side_effect=['history', 'exit']):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            assert 'No calculations in history' in output
+
+
+def test_calculator_history_with_calculations():
+    """Verify the history command tracks and displays calculations."""
+    with patch('builtins.input', side_effect=['add 2 3', 'multiply 4 5', 'history', 'exit']):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            assert '=== Calculation History' in output
+            assert '1. 2.0 add 3.0 = 5.0' in output
+            assert '2. 4.0 multiply 5.0 = 20.0' in output
+            assert '2 entries' in output
+
+
+def test_calculator_empty_input():
+    """Verify empty input is handled gracefully."""
+    with patch('builtins.input', side_effect=['', '  ', 'add 1 1', 'exit']):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            assert '1.0 add 1.0 = 2.0' in output
+            assert 'Goodbye!' in output
+
+
+def test_calculator_special_commands_case_insensitive():
+    """Verify special commands are case-insensitive."""
+    with patch('builtins.input', side_effect=['HELP', 'HISTORY', 'EXIT']):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            assert '=== Calculator Helper Functions ===' in output
+            assert 'No calculations in history' in output
+            assert 'Goodbye!' in output
+
+
+def test_calculator_history_not_affected_by_errors():
+    """Verify errors don't get added to history."""
+    with patch('builtins.input', side_effect=['add 1 1', 'invalid op', 'subtract 5 2', 'history', 'exit']):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            # Verify the successful calculations are in history
+            assert '1. 1.0 add 1.0 = 2.0' in output
+            assert '2. 5.0 subtract 2.0 = 3.0' in output
+            # Verify only 2 entries in history (errors not counted)
+            assert '2 entries' in output
+
+
+def test_calculator_mixed_session():
+    """Verify a mixed session with operations, special commands, and errors."""
+    with patch('builtins.input', side_effect=[
+        'add 1 1',
+        'help',
+        'multiply 3 4',
+        'invalid',
+        'history',
+        'divide 10 2',
+        'exit'
+    ]):
+        with patch('sys.stdout', new=StringIO()) as fake_out:
+            calculator()
+            output = fake_out.getvalue()
+            # Verify calculations executed
+            assert '1.0 add 1.0 = 2.0' in output
+            assert '3.0 multiply 4.0 = 12.0' in output
+            assert '10.0 divide 2.0 = 5.0' in output
+            # Verify help was shown
+            assert '=== Calculator Helper Functions ===' in output
+            # Verify error was shown
+            assert 'Error: Invalid format' in output
+            # Verify history (should only have 2 entries when history was called)
+            assert '2 entries' in output
+            assert 'Goodbye!' in output
