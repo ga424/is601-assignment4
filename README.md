@@ -1,3 +1,57 @@
+# Calculator Application
+
+A Python-based interactive command-line calculator with support for basic arithmetic operations including addition, subtraction, multiplication, division, and exponentiation. Built using the Factory design pattern for extensible calculation types.
+
+## 🏗️ Architecture
+
+This project follows the C4 model for architecture documentation. View the following diagrams to understand the system structure at different levels:
+
+- **[Context Diagram](docs/c4-context.md)** - System context showing how users interact with the calculator
+- **[Container Diagram](docs/c4-container.md)** - High-level containers (REPL, Calculation Engine, Operations)
+- **[Component Diagram](docs/c4-component.md)** - Internal component structure and relationships
+- **[Code Diagram](docs/c4-code.md)** - Code-level implementation details and class structures
+- **[Deployment Diagram](docs/c4-deployment.md)** - Deployment topology and infrastructure
+
+## ✨ Features
+
+- Interactive REPL (Read-Eval-Print Loop) interface
+- Support for basic operations: `add`, `subtract`, `multiply`, `divide`, `power`
+- Factory pattern for extensible calculation types
+- Comprehensive test coverage (99%+)
+- Input validation and error handling
+- Case-insensitive operation names
+
+## 🎯 Quick Start
+
+```bash
+# Clone the repository
+git clone git@github.com:ga424/is601-assignment4.git
+cd is601-assignment4
+
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Mac/Linux
+# or: venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the calculator
+python main.py
+```
+
+Example usage:
+```
+>>> add 5 3
+5.0 add 3.0 = 8.0
+>>> multiply 4 2.5
+4.0 multiply 2.5 = 10.0
+>>> exit
+Goodbye!
+```
+
+---
+
 # 📦 Project Setup
 
 ---
@@ -288,3 +342,107 @@ pytest -c /dev/null tests
 - [Python Downloads](https://www.python.org/downloads/)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [GitHub SSH Setup Guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh)
+
+---
+
+# 📂 Project Structure
+
+```
+assignment4/
+├── app/
+│   ├── calculation/          # Calculation factory and calculation classes
+│   │   └── __init__.py       # Factory pattern implementation
+│   ├── calculator/           # REPL interface
+│   │   └── __init__.py       # Calculator class and entry point
+│   └── operations/           # Core arithmetic operations (legacy)
+│       └── __init__.py       # Static operation methods
+├── tests/
+│   ├── test_calculator.py    # REPL and integration tests
+│   └── test_operations.py    # Calculation and operation tests
+├── docs/
+│   ├── c4-context.md         # System context diagram
+│   ├── c4-container.md       # Container-level architecture
+│   ├── c4-component.md       # Component-level structure
+│   ├── c4-code.md           # Code-level implementation
+│   └── c4-deployment.md     # Deployment topology
+├── main.py                   # Application entry point
+├── requirements.txt          # Python dependencies
+└── pytest.ini               # Test configuration
+```
+
+## 🔍 Key Components
+
+### Calculation Factory (`app/calculation/`)
+- **CalculationFactory**: Factory class for creating calculation instances
+- **Calculation**: Abstract base class for all calculation types
+- **Concrete Calculations**: AddCalculation, SubtractCalculation, MultiplyCalculation, DivideCalculation, PowerCalculation
+- Uses decorator pattern for automatic registration
+
+### Calculator REPL (`app/calculator/`)
+- **Calculator**: Main REPL class managing user interaction
+- Input parsing and validation
+- Error handling and recovery
+- Dynamic operation registry from factory
+
+### Operations Module (`app/operations/`)
+- Static arithmetic methods (legacy support)
+- Used by calculation classes for core arithmetic logic
+
+---
+
+# 📐 Architecture Documentation
+
+Detailed architecture diagrams are available in the `docs/` directory following the C4 model:
+
+| Diagram | Purpose | View |
+|---------|---------|------|
+| **Context** | System boundaries and external actors | [View](docs/c4-context.md) |
+| **Container** | High-level module structure | [View](docs/c4-container.md) |
+| **Component** | Internal component relationships | [View](docs/c4-component.md) |
+| **Code** | Class structures and methods | [View](docs/c4-code.md) |
+| **Deployment** | Infrastructure and deployment topology | [View](docs/c4-deployment.md) |
+
+---
+
+# 🧪 Testing
+
+This project maintains 99%+ code coverage with comprehensive unit and integration tests.
+
+**Run all tests:**
+```bash
+pytest
+```
+
+**Run with coverage report:**
+```bash
+pytest --cov --cov-report=term-missing
+```
+
+**View HTML coverage report:**
+```bash
+pytest --cov --cov-report=html
+open htmlcov/index.html
+```
+
+## Test Structure
+
+- `tests/test_calculator.py` - REPL functionality, input parsing, error handling
+- `tests/test_operations.py` - Calculation factory, operations, edge cases
+
+---
+
+# 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes with tests
+4. Ensure tests pass: `pytest`
+5. Commit: `git commit -m "Add feature"`
+6. Push: `git push origin feature-name`
+7. Create a Pull Request
+
+---
+
+# 📄 License
+
+See [LICENSE](LICENSE) file for details.
