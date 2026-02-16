@@ -101,7 +101,8 @@ class DivideCalculation(Calculation):
 
     def execute(self) -> float:
         if self.b == 0:
-            raise ValueError("Cannot divide by zero.")
+            # Guard against division by zero and raise a more specific error.
+            raise ZeroDivisionError("Cannot divide by zero.")
         return self.a / self.b
 
 
