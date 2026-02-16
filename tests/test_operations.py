@@ -3,11 +3,114 @@
 import pytest
 
 from app.calculation import CalculationFactory
+from app.operations import Operations
 
 
 def _create_calculation(operation: str, a: float, b: float):
     """Create a calculation using the factory."""
     return CalculationFactory.create_calculation(operation, a, b)
+
+
+# Tests for Operations class static methods
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (2, 3, 5),
+        (-1, 1, 0),
+        (1.5, 2.5, 4.0),
+    ],
+    ids=[
+        "adds two positive numbers",
+        "adds numbers with mixed signs to zero",
+        "adds two floating point numbers",
+    ],
+)
+def test_operations_addition(a, b, expected):
+    """Test Operations.addition static method."""
+    assert Operations.addition(a, b) == expected
+
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (5, 3, 2),
+        (-5, -3, -2),
+        (5.5, 2.5, 3.0),
+    ],
+    ids=[
+        "subtracts two positive numbers",
+        "subtracts two negative numbers",
+        "subtracts floating point numbers",
+    ],
+)
+def test_operations_subtraction(a, b, expected):
+    """Test Operations.subtraction static method."""
+    assert Operations.subtraction(a, b) == expected
+
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (2, 3, 6),
+        (-2, -3, 6),
+        (2.5, 4, 10.0),
+    ],
+    ids=[
+        "multiplies two positive numbers",
+        "multiplies two negative numbers",
+        "multiplies floating point numbers",
+    ],
+)
+def test_operations_multiplication(a, b, expected):
+    """Test Operations.multiplication static method."""
+    assert Operations.multiplication(a, b) == expected
+
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (6, 2, 3),
+        (-6, -2, 3),
+        (5.0, 2.0, 2.5),
+    ],
+    ids=[
+        "divides two positive numbers",
+        "divides two negative numbers",
+        "divides floating point numbers",
+    ],
+)
+def test_operations_division(a, b, expected):
+    """Test Operations.division static method."""
+    assert Operations.division(a, b) == expected
+
+
+def test_operations_division_by_zero():
+    """Test Operations.division raises ZeroDivisionError on division by zero."""
+    with pytest.raises(ZeroDivisionError, match="Cannot divide by zero"):
+        Operations.division(1, 0)
+
+
+@pytest.mark.parametrize(
+    "a,b,expected",
+    [
+        (2, 3, 8),
+        (5, 0, 1),
+        (4, 0.5, 2.0),
+        (-2, 3, -8),
+    ],
+    ids=[
+        "powers with positive exponent",
+        "powers with zero exponent",
+        "powers with fractional exponent",
+        "powers with negative base",
+    ],
+)
+def test_operations_power(a, b, expected):
+    """Test Operations.power static method."""
+    assert Operations.power(a, b) == expected
+
+
+
 
 
 @pytest.mark.parametrize(

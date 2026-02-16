@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, Type
+from app.operations import Operations
 
 # These simple value-object style classes intentionally expose one public method.
 # pylint: disable=too-few-public-methods
@@ -76,7 +77,7 @@ class AddCalculation(Calculation):
     """Addition calculation."""
 
     def execute(self) -> float:
-        return self.a + self.b
+        return Operations.addition(self.a, self.b)
 
 
 @CalculationFactory.register_calculation("subtract")
@@ -84,7 +85,7 @@ class SubtractCalculation(Calculation):
     """Subtraction calculation."""
 
     def execute(self) -> float:
-        return self.a - self.b
+        return Operations.subtraction(self.a, self.b)
 
 
 @CalculationFactory.register_calculation("multiply")
@@ -92,7 +93,7 @@ class MultiplyCalculation(Calculation):
     """Multiplication calculation."""
 
     def execute(self) -> float:
-        return self.a * self.b
+        return Operations.multiplication(self.a, self.b)
 
 
 @CalculationFactory.register_calculation("divide")
@@ -100,10 +101,7 @@ class DivideCalculation(Calculation):
     """Division calculation."""
 
     def execute(self) -> float:
-        if self.b == 0:
-            # Guard against division by zero and raise a more specific error.
-            raise ZeroDivisionError("Cannot divide by zero.")
-        return self.a / self.b
+        return Operations.division(self.a, self.b)
 
 
 @CalculationFactory.register_calculation("power")
@@ -111,7 +109,7 @@ class PowerCalculation(Calculation):
     """Exponentiation calculation."""
 
     def execute(self) -> float:
-        return self.a**self.b
+        return Operations.power(self.a, self.b)
 
 
 __all__ = [
