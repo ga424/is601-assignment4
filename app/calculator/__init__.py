@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, List, Tuple
 
 from app.calculation import CalculationFactory
 
@@ -21,6 +21,7 @@ class Calculator:  # pylint: disable=too-few-public-methods
         self.operations = operations
         self.input_func = input if input_func is None else input_func
         self.output_func = print if output_func is None else output_func
+        self.history: List[str] = []
 
     def _build_operation_registry(self) -> Dict[str, Callable[[float, float], float]]:
         """Build an operations registry based on factory registrations."""
@@ -37,13 +38,25 @@ class Calculator:  # pylint: disable=too-few-public-methods
         while True:
             try:
                 user_input = self.input_func(">>> ").strip()
+                if not user_input:
+                    continue
+                
+                # Handle special commands
                 if user_input.lower() == "exit":
                     self.output_func("Goodbye!")
                     break
+                if user_input.lower() == "help":
+                    self._print_help()
+                    continue
+                if user_input.lower() == "history":
+                    self._print_history()
+                    continue
 
                 operation, operand1, operand2 = self._parse_input(user_input)
                 result = self._execute(operation, operand1, operand2)
-                self.output_func(f"{operand1} {operation} {operand2} = {result}")
+                output = f"{operand1} {operation} {operand2} = {result}"
+                self.history.append(output)
+                self.output_func(output)
             except ValueError as exc:
                 self.output_func(f"Error: {exc}")
             except KeyboardInterrupt:
@@ -61,7 +74,32 @@ class Calculator:  # pylint: disable=too-few-public-methods
         )
         self.output_func("Usage: operation operand1 operand2")
         self.output_func("Example: add 1 1")
-        self.output_func("Type 'exit' to quit.\n")
+        self.output_func("Special commands: help, history, exit")
+        self.output_func("Type 'help' for more information.\n")
+    
+    def _print_help(self) -> None:
+        """Print detailed help information."""
+        self.output_func("\n=== Calculator Helper Functions ===")
+        self.output_func("\nPlease find below available operations:")
+        for op in sorted(self.operations.keys()):
+            self.output_func(f"  {op:<10} - Perform {op} operation")
+        self.output_func("\nSpecial Commands:")
+        self.output_func("  help       - Display this help message")
+        self.output_func("  history    - Show calculation history")
+        self.output_func("  exit       - Exit the calculator")
+        self.output_func("\nUsage: <operation> <operand1> <operand2>")
+        self.output_func("Example: add 5 3\n")
+    
+    def _print_history(self) -> None:
+        """Print calculation history."""
+        if not self.history:
+            self.output_func("No calculations in history.")
+            return
+        
+        self.output_func(f"\n=== Calculation History ({len(self.history)} entries) ===")
+        for idx, entry in enumerate(self.history, 1):
+            self.output_func(f"{idx}. {entry}")
+        self.output_func("")
 
     def _parse_input(self, user_input: str) -> Tuple[str, float, float]:
         """Parse and validate user input into operation and operands."""
