@@ -3,6 +3,7 @@
 
 class Operations:
     """Collection of basic arithmetic operations."""
+
     @staticmethod
     def addition(a: float, b: float) -> float:
         """Return the sum of two numbers."""
