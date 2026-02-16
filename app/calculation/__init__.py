@@ -122,5 +122,3 @@ __all__ = [
     "DivideCalculation",
     "PowerCalculation",
 ]
-
-
